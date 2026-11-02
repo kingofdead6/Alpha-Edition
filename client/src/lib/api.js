@@ -1,4 +1,6 @@
-const BASE = `${(import.meta.env.VITE_API_URL || '').replace(/\/$/, '')}/api`;
+// __API_URL__ is set in vite.config.js
+// eslint-disable-next-line no-undef
+const BASE = `${__API_URL__}/api`;
 const TOKEN_KEY = 'alfa-token';
 
 let token = null;

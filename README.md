@@ -19,7 +19,7 @@ Open `server/.env` and fill the empty values:
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | From the Cloudinary dashboard → API Keys |
 | `ADMIN_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` | The first admin account. It is created automatically on first start. |
 
-`client/.env` can stay empty (see Deployment).
+The client has no `.env`. The API address is set once in `client/vite.config.js` (`API_URL`, currently `https://alpha-edition.onrender.com`).
 
 The site runs without Cloudinary. Only cover/portrait uploads and manuscript attachments are switched off, and the admin dashboard shows a notice until the keys are set.
 
@@ -28,7 +28,7 @@ The site runs without Cloudinary. Only cover/portrait uploads and manuscript att
 ```bash
 npm run install:all     # installs root, server and client
 npm run seed            # adds the admin + 8 sample books and authors (in both languages)
-npm run dev             # API on :5000, site on :5173
+npm run dev             # API on :5000, site on :5173 (the site uses the Render API, see below)
 ```
 
 - Site: http://localhost:5173
@@ -73,7 +73,7 @@ Security: helmet (with a CSP that allows Google Fonts and Cloudinary), CORS limi
 
 **One server (simplest):** `npm run build`, then `npm start` with `NODE_ENV=production`. Express serves the built React app and the API from the same domain. Works on Render, Railway, a VPS, etc.
 
-**Split (e.g. Vercel + Render):** deploy `server/` as a Node service and `client/` as a static site. Set `VITE_API_URL=https://your-api.example.com` in `client/.env` before building, and add the site's URL to `CLIENT_URL` in `server/.env`. On Vercel, add a rewrite of `/(.*)` to `/index.html` so book pages work on refresh.
+**Split (e.g. Vercel + Render):** deploy `server/` as a Node service and `client/` as a static site. The API address lives in `API_URL` in `client/vite.config.js`: in development Vite forwards `/api` to it, and `npm run build` bakes it into the site. Add the site's URL to `CLIENT_URL` in the API's environment (on Render: Environment tab) so the browser is allowed to call it. On Vercel, add a rewrite of `/(.*)` to `/index.html` so book pages work on refresh.
 
 ## 6. Project structure
 
@@ -91,7 +91,7 @@ editions-alfa/
 │       ├── validators.js    # zod schemas
 │       └── seed/            # sample bilingual catalogue
 └── client/
-    ├── .env                # VITE_API_URL (optional)
+    ├── vite.config.js      # API_URL: where the API lives
     └── src/
         ├── i18n/en.js, ar.js   # all interface text
         ├── lib/                # api, language, theme, auth, reading list
