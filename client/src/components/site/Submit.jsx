@@ -18,7 +18,7 @@ function Field({ id, label, error, full, children }) {
   );
 }
 
-export default function Submit({ settings }) {
+export default function Submit({ settings, page = false }) {
   const { t, fmtDate, fmtNum, lang } = useLang();
   const [form, setForm] = useState(() => ({ ...EMPTY, language: lang === 'ar' ? 'ar' : 'en' }));
   const [file, setFile] = useState(null);
@@ -90,11 +90,11 @@ export default function Submit({ settings }) {
   const inv = (k) => (errors[k] ? { 'aria-invalid': true, 'aria-describedby': `f-${k}-err` } : {});
 
   return (
-    <section className="section scroll-mt-16" id="submit">
+    <section className={`scroll-mt-16 ${page ? 'pb-[clamp(56px,8vw,110px)] pt-[clamp(32px,5vw,64px)]' : 'section'}`} id="submit">
       <div className="wrap grid items-start gap-[clamp(32px,6vw,90px)] lg:grid-cols-[.9fr_1.1fr]">
         <div className="min-w-0">
           <Reveal as="p" className="eyebrow">{t('submit.eyebrow')}</Reveal>
-          <Reveal as="h2" delay={80} className="mb-5 mt-3.5 text-[clamp(2.2rem,4.6vw,3.8rem)]">
+          <Reveal as={page ? 'h1' : 'h2'} delay={80} className="mb-5 mt-3.5 text-[clamp(2.2rem,4.6vw,3.8rem)]">
             {t('submit.title')}<em className="text-cloth">{t('submit.titleEm')}</em>
           </Reveal>
           <Reveal as="p" delay={160} className="max-w-[46ch] text-muted">{t('submit.text')}</Reveal>

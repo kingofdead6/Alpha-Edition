@@ -4,7 +4,7 @@ import Admin from '../models/Admin.js';
 import { HttpError } from '../utils/http.js';
 
 export const signToken = (admin) =>
-  jwt.sign({ sub: String(admin._id) }, env.jwtSecret, { expiresIn: '7d' });
+  jwt.sign({ sub: String(admin._id), tv: admin.tokenVersion || 0 }, env.jwtSecret, { expiresIn: '12h' });
 
 export async function requireAuth(req, res, next) {
   const header = req.get('authorization') || '';
@@ -20,6 +20,9 @@ export async function requireAuth(req, res, next) {
 
   const admin = await Admin.findById(payload.sub).select('-passwordHash').lean();
   if (!admin) throw new HttpError(401, 'Please sign in', 'unauthorized');
+  if ((admin.tokenVersion || 0) !== (payload.tv || 0)) {
+    throw new HttpError(401, 'Your session has expired. Sign in again.', 'unauthorized');
+  }
   req.admin = admin;
   next();
 }

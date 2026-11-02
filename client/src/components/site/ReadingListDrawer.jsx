@@ -5,7 +5,6 @@ import { useReadingList } from '../../lib/readingList.jsx';
 import { formatPrice } from '../../lib/util.js';
 import BookCover from '../BookCover.jsx';
 import Icon from '../Icon.jsx';
-import { SectionLink } from './Header.jsx';
 
 export default function ReadingListDrawer() {
   const { t, pick, lang, fmtNum } = useLang();
@@ -52,7 +51,7 @@ export default function ReadingListDrawer() {
             <Icon name="bookmark" size={32} className="text-proof" />
             <p className="font-display text-2xl">{t('list.empty')}</p>
             <p className="text-muted">{t('list.emptyHint')}</p>
-            <SectionLink id="catalogue" className="btn btn-sm mt-2" onClick={() => setOpen(false)}>{t('list.browse')}</SectionLink>
+            <Link to="/books" className="btn btn-sm mt-2" onClick={() => setOpen(false)}>{t('list.browse')}</Link>
           </div>
         ) : (
           <>

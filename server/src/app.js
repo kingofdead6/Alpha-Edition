@@ -16,7 +16,7 @@ const CLIENT_DIST = path.resolve(__dirname, '../../client/dist');
 
 export function createApp() {
   const app = express();
-  app.set('trust proxy', 1);
+  app.set('trust proxy', Number(process.env.TRUST_PROXY) || 0);
   app.disable('x-powered-by');
 
   app.use(

@@ -37,6 +37,7 @@ async function run() {
       console.log(`  ✓ Admin created: ${env.admin.email}`);
     } else if (resetAdmin) {
       existing.passwordHash = await Admin.hash(env.admin.password);
+      existing.tokenVersion = (existing.tokenVersion || 0) + 1; // invalidate old sessions
       await existing.save();
       console.log(`  ✓ Admin password reset: ${env.admin.email}`);
     } else {

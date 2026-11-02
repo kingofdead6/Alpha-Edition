@@ -120,11 +120,12 @@ export function AuthorSpotlight({ author, books }) {
               {pick(author.note)}
             </span>
           </Reveal>
-          {theirBook && (
-            <Reveal delay={240} className="mt-[30px]">
+          <Reveal delay={240} className="mt-[30px] flex flex-wrap gap-3">
+            {theirBook && (
               <Link to={`/books/${theirBook.slug}#reader`} className="btn btn-ghost">{t('author.cta')} <span className="arr">→</span></Link>
-            </Reveal>
-          )}
+            )}
+            <Link to={`/authors/${author.slug}`} className="btn btn-quiet">{t('book.aboutAuthor')}</Link>
+          </Reveal>
         </div>
       </div>
     </section>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useLang } from '../../lib/i18n.jsx';
 import { useTheme } from '../../lib/theme.jsx';
 import { useReadingList } from '../../lib/readingList.jsx';
@@ -12,11 +12,12 @@ export function SectionLink({ id, className, children, onClick }) {
   return <Link to={`/#${id}`} className={className} onClick={onClick}>{children}</Link>;
 }
 
-const SECTIONS = [
-  ['catalogue', 'nav.catalogue'],
-  ['process', 'nav.process'],
-  ['authors', 'nav.authors'],
-  ['submit', 'nav.submit'],
+export const PAGES = [
+  ['/books', 'nav.catalogue'],
+  ['/authors', 'nav.authors'],
+  ['/about', 'nav.about'],
+  ['/submit', 'nav.submit'],
+  ['/contact', 'nav.contact'],
 ];
 
 export function ThemeButton({ className = '' }) {
@@ -89,11 +90,11 @@ export default function Header() {
           </span>
         </Link>
 
-        <nav className="ms-auto hidden gap-7 lg:flex" aria-label="Main">
-          {SECTIONS.map(([id, key]) => (
-            <SectionLink key={id} id={id} className="navlink text-[15px] font-medium text-muted transition-colors hover:text-ink">
+        <nav className="ms-auto hidden gap-6 lg:flex xl:gap-7" aria-label="Main">
+          {PAGES.map(([to, key]) => (
+            <NavLink key={to} to={to} className="navlink text-[15px] font-medium text-muted transition-colors hover:text-ink">
               {t(key)}
-            </SectionLink>
+            </NavLink>
           ))}
         </nav>
 
@@ -112,9 +113,9 @@ export default function Header() {
               {items.length}
             </b>
           </button>
-          <SectionLink id="submit" className="btn btn-sm hidden md:inline-flex">
+          <Link to="/submit" className="btn btn-sm hidden md:inline-flex">
             {t('nav.submitCta')} <span className="arr">→</span>
-          </SectionLink>
+          </Link>
           <button
             type="button"
             className="grid h-9 w-9 place-items-center rounded-sm border border-line lg:hidden"
@@ -131,10 +132,16 @@ export default function Header() {
       {menu && (
         <div id="mobile-menu" className="menu-panel border-t border-line bg-paper lg:hidden">
           <nav className="wrap flex flex-col py-3" aria-label="Main">
-            {SECTIONS.map(([id, key]) => (
-              <SectionLink key={id} id={id} onClick={() => setMenu(false)} className="border-b border-line py-3.5 font-display text-2xl last:border-0">
+            {PAGES.map(([to, key]) => (
+              <NavLink
+                key={to}
+                to={to}
+                onClick={() => setMenu(false)}
+                className={({ isActive }) => `flex items-center justify-between border-b border-line py-3.5 font-display text-2xl last:border-0 ${isActive ? 'text-cloth' : ''}`}
+              >
                 {t(key)}
-              </SectionLink>
+                <Icon name="chevron" size={18} className="text-muted rtl:rotate-180" />
+              </NavLink>
             ))}
             <div className="flex gap-2 pb-2 pt-4 sm:hidden">
               <LangButton />

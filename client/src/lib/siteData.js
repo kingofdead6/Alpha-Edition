@@ -58,6 +58,31 @@ export function useBook(slug) {
   return state;
 }
 
+/** Fetches a public endpoint once per session; revisiting the page renders from cache */
+const pageCache = new Map();
+export function useCachedApi(path) {
+  const [state, setState] = useState(() => ({ data: pageCache.get(path) || null, error: null }));
+
+  useEffect(() => {
+    let alive = true;
+    setState({ data: pageCache.get(path) || null, error: null });
+    api(path)
+      .then((d) => {
+        pageCache.set(path, d);
+        if (alive) setState({ data: d, error: null });
+      })
+      .catch((err) => alive && setState((s) => ({ ...s, error: err })));
+    return () => {
+      alive = false;
+    };
+  }, [path]);
+
+  return state;
+}
+
+export const useAuthors = () => useCachedApi('/public/authors');
+export const useAuthor = (slug) => useCachedApi(`/public/authors/${encodeURIComponent(slug)}`);
+
 export function getSettings() {
   return homeCache?.settings || null;
 }

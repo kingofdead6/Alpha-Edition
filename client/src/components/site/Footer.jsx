@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { useLang } from '../../lib/i18n.jsx';
 import { useToast } from '../../lib/toast.jsx';
 import { api, errorText } from '../../lib/api.js';
-import { SectionLink } from './Header.jsx';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -37,8 +36,8 @@ export default function Footer({ settings }) {
     if (!EMAIL.test(email.trim())) return toast(t('footer.badEmail'));
     setBusy(true);
     try {
-      const d = await api('/public/subscribers', { method: 'POST', body: { email: email.trim(), lang } });
-      toast(d.already ? t('footer.already') : t('footer.subscribed'));
+      await api('/public/subscribers', { method: 'POST', body: { email: email.trim(), lang } });
+      toast(t('footer.subscribed'));
       setEmail('');
     } catch (err) {
       toast(errorText(err, t));
@@ -67,8 +66,8 @@ export default function Footer({ settings }) {
   return (
     <footer className="bg-ink pb-8 pt-[clamp(56px,8vw,96px)] text-paper">
       <div className="wrap">
-        <div className="grid gap-10 md:grid-cols-[1.3fr_1fr_1fr]">
-          <div className="min-w-0">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_.7fr_.7fr]">
+          <div className="min-w-0 sm:col-span-2 lg:col-span-1">
             <h4 className="mb-3.5 font-mono text-[12px] font-medium uppercase tracking-[var(--track)] opacity-60">{t('footer.letter')}</h4>
             <p className="max-w-[44ch] text-[15px] opacity-85">{t('footer.letterText')}</p>
             <form className="mt-[18px] flex flex-wrap gap-2" onSubmit={subscribe} noValidate>
@@ -102,8 +101,17 @@ export default function Footer({ settings }) {
           <div>
             <h4 className="mb-3.5 font-mono text-[12px] font-medium uppercase tracking-[var(--track)] opacity-60">{t('footer.read')}</h4>
             <ul className="grid gap-2 text-[15px]">
-              {['catalogue', 'process', 'authors', 'submit'].map((id) => (
-                <li key={id}><SectionLink id={id} className="opacity-85 hover:underline hover:opacity-100">{t(`nav.${id}`)}</SectionLink></li>
+              <li><Link to="/books" className="opacity-85 hover:underline hover:opacity-100">{t('nav.catalogue')}</Link></li>
+              {['fiction', 'essays', 'poetry', 'translation'].map((c) => (
+                <li key={c}><Link to={`/books?cat=${c}`} className="opacity-85 hover:underline hover:opacity-100">{t(`cats.${c}`)}</Link></li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="mb-3.5 font-mono text-[12px] font-medium uppercase tracking-[var(--track)] opacity-60">{t('footer.house')}</h4>
+            <ul className="grid gap-2 text-[15px]">
+              {['about', 'authors', 'submit', 'contact'].map((id) => (
+                <li key={id}><Link to={`/${id}`} className="opacity-85 hover:underline hover:opacity-100">{t(`nav.${id}`)}</Link></li>
               ))}
             </ul>
           </div>
@@ -111,7 +119,9 @@ export default function Footer({ settings }) {
         <Wordmark />
         <div className="mt-6 flex flex-wrap justify-between gap-3 border-t border-paper/20 pt-5 font-mono text-[12px] leading-relaxed opacity-60">
           <span>{t('footer.colophon')}</span>
-          <span className="flex gap-4">
+          <span className="flex flex-wrap gap-x-4 gap-y-1">
+            <Link to="/privacy" className="hover:underline">{t('nav.privacy')}</Link>
+            <Link to="/terms" className="hover:underline">{t('nav.terms')}</Link>
             <Link to="/admin" className="hover:underline">{t('footer.staff')}</Link>
             <span>{t('footer.rights', { year })}</span>
           </span>

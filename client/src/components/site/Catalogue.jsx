@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useLang } from '../../lib/i18n.jsx';
 import { errorText } from '../../lib/api.js';
 import { prefersReducedMotion } from '../../lib/util.js';
@@ -18,9 +19,17 @@ function Skeletons() {
   ));
 }
 
-export default function Catalogue({ books, loading, error, onRetry }) {
+/** On the home page this is a section; with `page` it is the /books page and keeps the collection in the URL */
+export default function Catalogue({ books, loading, error, onRetry, page = false }) {
   const { t, pick, fmtNum, lang } = useLang();
-  const [cat, setCat] = useState('all');
+  const [params, setParams] = useSearchParams();
+  const urlCat = page && CATS.includes(params.get('cat')) ? params.get('cat') : 'all';
+  const [cat, setCatState] = useState(urlCat);
+  useEffect(() => { if (page) setCatState(urlCat); }, [page, urlCat]);
+  const setCat = (c) => {
+    setCatState(c);
+    if (page) setParams(c === 'all' ? {} : { cat: c }, { replace: true });
+  };
   const [q, setQ] = useState('');
   const [sort, setSort] = useState('newest');
 
@@ -64,12 +73,12 @@ export default function Catalogue({ books, loading, error, onRetry }) {
   const count = (c) => (c === 'all' ? books.length : books.filter((b) => b.category === c).length);
 
   return (
-    <section className="section scroll-mt-16" id="catalogue">
+    <section className={`scroll-mt-16 ${page ? 'pb-[clamp(72px,10vw,136px)] pt-[clamp(32px,5vw,64px)]' : 'section'}`} id="catalogue">
       <div className="wrap">
         <div className="mb-[clamp(32px,5vw,56px)] grid items-end gap-x-10 gap-y-6 lg:grid-cols-[minmax(0,1fr)_auto]">
           <div className="min-w-0">
             <Reveal as="p" className="eyebrow">{t('catalogue.eyebrow')}</Reveal>
-            <Reveal as="h2" delay={80} className="mt-3.5 text-[clamp(2.2rem,4.6vw,3.8rem)]">
+            <Reveal as={page ? 'h1' : 'h2'} delay={80} className={`mt-3.5 ${page ? 'page-title' : 'text-[clamp(2.2rem,4.6vw,3.8rem)]'}`}>
               {t('catalogue.title', { n: fmtNum(books.length) })}
               <em className="text-cloth">{t('catalogue.titleEm')}</em>
             </Reveal>

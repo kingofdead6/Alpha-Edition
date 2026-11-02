@@ -7,7 +7,7 @@ import Author from '../models/Author.js';
 import Settings from '../models/Settings.js';
 import Submission from '../models/Submission.js';
 import Subscriber from '../models/Subscriber.js';
-import { DOC_TYPES, manuscriptUpload } from '../middleware/upload.js';
+import { DOC_TYPES, manuscriptUpload, sniffDocType } from '../middleware/upload.js';
 import { HttpError } from '../utils/http.js';
 import { publicAuthor, publicBook, publicSettings } from '../utils/serialize.js';
 import { submissionInput, subscriberInput } from '../validators.js';
@@ -72,6 +72,29 @@ router.get('/books/:slug', async (req, res) => {
   res.json({ book: publicBook(book, true), related: related.map((b) => publicBook(b)) });
 });
 
+/** All published authors with how many published books each has */
+router.get('/authors', async (req, res) => {
+  const [authors, counts] = await Promise.all([
+    Author.find({ status: 'published' }).sort({ featured: -1, 'name.en': 1 }).lean(),
+    Book.aggregate([{ $match: { status: 'published' } }, { $group: { _id: '$author', n: { $sum: 1 } } }]),
+  ]);
+  const byAuthor = new Map(counts.map((c) => [String(c._id), c.n]));
+  res.json({
+    authors: authors.map((a) => ({ ...publicAuthor(a, true), featured: a.featured, books: byAuthor.get(String(a._id)) || 0 })),
+  });
+});
+
+router.get('/authors/:slug', async (req, res) => {
+  const author = await Author.findOne({ slug: String(req.params.slug), status: 'published' }).lean();
+  if (!author) throw new HttpError(404, 'Author not found', 'not_found');
+  // sample is loaded only so hasSample is right; publicBook leaves the text out
+  const books = await Book.find({ author: author._id, status: 'published' })
+    .populate('author', 'name slug')
+    .sort({ publishedAt: -1 })
+    .lean();
+  res.json({ author: { ...publicAuthor(author, true), featured: author.featured }, books: books.map((b) => publicBook(b)) });
+});
+
 router.get('/settings', async (req, res) => {
   res.json(publicSettings(await Settings.getSingleton()));
 });
@@ -105,6 +128,9 @@ router.post('/submissions', limiter(6, 60), manuscriptUpload.single('file'), asy
       throw new HttpError(503, 'File uploads are not set up yet', 'uploads_disabled');
     }
     const ext = DOC_TYPES[req.file.mimetype];
+    if (sniffDocType(req.file.buffer) !== ext) {
+      throw new HttpError(400, 'That file does not look like a real PDF or Word document', 'bad_file_type');
+    }
     const base = req.file.originalname
       .replace(/\.[^.]+$/, '')
       .normalize('NFKD')
@@ -128,9 +154,9 @@ router.post('/submissions', limiter(6, 60), manuscriptUpload.single('file'), asy
 
 router.post('/subscribers', limiter(20, 60), async (req, res) => {
   const { email, lang } = subscriberInput.parse(req.body || {});
-  const existing = await Subscriber.findOne({ email });
-  if (existing) return res.json({ ok: true, already: true });
-  await Subscriber.create({ email, lang });
+  // Upsert quietly and always answer the same way, so the response does not
+  // reveal whether an address is already on the list.
+  await Subscriber.updateOne({ email }, { $setOnInsert: { email, lang } }, { upsert: true });
   res.status(201).json({ ok: true });
 });
 

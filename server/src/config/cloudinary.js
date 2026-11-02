@@ -29,13 +29,13 @@ export async function destroyAsset(publicId, { resourceType = 'image', type = 'u
 }
 
 /** Short-lived signed link to a private manuscript */
-export function signedManuscriptUrl(publicId) {
+export function signedManuscriptUrl(publicId, ttlSeconds = 600) {
   if (!publicId || !cloudinaryReady) return null;
-  return cloudinary.url(publicId, {
+  // Expiring, signed download link (valid for ttlSeconds, default 10 min).
+  return cloudinary.utils.private_download_url(publicId, '', {
     resource_type: 'raw',
     type: 'authenticated',
-    sign_url: true,
-    secure: true,
+    expires_at: Math.floor(Date.now() / 1000) + ttlSeconds,
   });
 }
 

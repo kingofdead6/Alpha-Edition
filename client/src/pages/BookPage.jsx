@@ -87,7 +87,7 @@ export default function BookPage() {
     <>
       <section className="pb-[clamp(56px,8vw,110px)] pt-[clamp(24px,4vw,48px)]">
         <div className="wrap">
-          <Link to="/#catalogue" className="mb-8 inline-flex items-center gap-2 text-[15px] text-muted hover:text-ink">
+          <Link to="/books" className="mb-8 inline-flex items-center gap-2 text-[15px] text-muted hover:text-ink">
             <Icon name="arrow" size={16} className="rotate-180 rtl:rotate-0" /> {t('book.back')}
           </Link>
           <div className="grid items-start gap-[clamp(32px,6vw,90px)] md:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)]">
@@ -107,7 +107,9 @@ export default function BookPage() {
               </p>
               <h1 className="mb-3 mt-4 text-[clamp(2.6rem,6vw,5rem)]">{title}</h1>
               <p className="text-lg text-muted">
-                {pick(book.author?.name)}
+                {book.author?.slug
+                  ? <Link to={`/authors/${book.author.slug}`} className="underline decoration-line underline-offset-4 transition-colors hover:text-ink hover:decoration-proof">{pick(book.author.name)}</Link>
+                  : pick(book.author?.name)}
                 {translator && (
                   <span className="block text-[15px]">
                     {book.translatedFrom
@@ -155,6 +157,9 @@ export default function BookPage() {
                   <div className="min-w-0">
                     <p className="label">{t('book.aboutAuthor')}</p>
                     <p className="mt-2 max-w-[56ch] text-muted">{pick(book.author.bio)}</p>
+                    <Link to={`/authors/${book.author.slug}`} className="mt-3 inline-flex items-center gap-1.5 text-[15px] font-medium hover:text-cloth">
+                      {pick(book.author.name)} <Icon name="arrow" size={15} className="rtl:rotate-180" />
+                    </Link>
                   </div>
                 </div>
               )}

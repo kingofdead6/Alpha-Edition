@@ -51,6 +51,14 @@ export function useTransitionNavigate() {
   );
 }
 
+/** Sets the tab title for a page, restoring the site name on the way out */
+export function usePageTitle(title, brand) {
+  useEffect(() => {
+    if (title) document.title = `${title} · ${brand}`;
+    return () => { document.title = 'Éditions Alfa · منشورات ألفا'; };
+  }, [title, brand]);
+}
+
 export function useMediaQuery(query) {
   const [match, setMatch] = useState(() => window.matchMedia(query).matches);
   useEffect(() => {
